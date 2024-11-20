@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Polling</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* styles.css */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #f3e7e9, #e3eeff); /* Light pastel gradient background */
+    background-attachment: fixed;
+    color: #333333;
+  }
+  
+  #poll-container {
+    width: 400px;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #ffffff; /* White background for the poll card */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  h2 {
+    margin-bottom: 20px;
+    color: #444444;
+  }
+  
+  form {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    font-size: 16px;
+    color: #555555;
+    margin: 10px 0;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Hover effect for options */
+  label:hover {
+    background-color: #d1e7dd; /* Soft green background on hover */
+    color: #333333;
+  }
+  
+  input[type="radio"] {
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Enhanced Results Container */
+  #results-container {
+    margin-top: 20px;
+    display: none;
+  }
+  
+  #results-container .result-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+  }
+  
+  #results-container .result-item p {
+    flex: 1;
+    font-size: 16px;
+    color: #333333;
+    margin: 0;
+  }
+  
+  #results-container .progress-bar {
+    flex: 2;
+    height: 15px;
+    border-radius: 5px;
+    background-color: #d1e7dd;
+    margin-left: 10px;
+    position: relative;
+  }
+  
+  #results-container .progress-bar .fill {
+    height: 100%;
+    background-color: #4CAF50; /* Green fill for results */
+    border-radius: 5px;
+  }
+  
+  #show-results-btn {
+    margin-top: 10px;
+    background-color: #008CBA;
+  }
+  
+  #show-results-btn:hover {
+    background-color: #007B9A;
+  }
+  
+  </style>
+  <script>
+    // Poll Data
+const pollData = {
+    question: "What is your favorite programming language?",
+    options: ["JavaScript", "Python", "Java", "C++"],
+    votes: [0, 0, 0, 0]
+  };
+  
+  // Display Poll Question and Options
+  function displayPoll() {
+    document.getElementById("poll-question").innerText = pollData.question;
+    const form = document.getElementById("poll-form");
+    pollData.options.forEach((option, index) => {
+      const optionHTML = `
+        <label>
+          <input type="radio" name="option" value="${index}">
+          ${option}
+        </label><br>`;
+      form.insertAdjacentHTML("beforeend", optionHTML);
+    });
+  }
+  
+  // Submit Vote and Show "Show Results" Button
+  function submitVote() {
+    const selectedOption = document.querySelector('input[name="option"]:checked');
+    if (selectedOption) {
+      const voteIndex = parseInt(selectedOption.value);
+      pollData.votes[voteIndex]++;
+      // Show the "Show Results" button after voting
+      document.getElementById("show-results-btn").style.display = "block";
+      alert("Your vote has been recorded!");
+    } else {
+      alert("Please select an option to vote.");
+    }
+  }
+  
+  // Display Results when "Show Results" is clicked
+  function displayResults() {
+    const resultsContainer = document.getElementById("results-container");
+    resultsContainer.innerHTML = ""; // Clear previous results
+    pollData.options.forEach((option, index) => {
+      const percentage = ((pollData.votes[index] / pollData.votes.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+      const resultHTML = `
+        <p>${option}: ${pollData.votes[index]} votes (${percentage}%)</p>`;
+      resultsContainer.insertAdjacentHTML("beforeend", resultHTML);
+    });
+    // Show the results container
+    resultsContainer.style.display = "block";
+  }
+  
+  // Initialize Poll on Page Load
+  window.onload = displayPoll;
+  function displayResults() {
+    const resultsContainer = document.getElementById("results-container");
+    resultsContainer.innerHTML = ""; // Clear previous results
+  
+    pollData.options.forEach((option, index) => {
+      const voteCount = pollData.votes[index];
+      const totalVotes = pollData.votes.reduce((a, b) => a + b, 0);
+      const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(1) : 0;
+  
+      // Create result item
+      const resultItem = document.createElement("div");
+      resultItem.classList.add("result-item");
+  
+      // Option label
+      const optionLabel = document.createElement("p");
+      optionLabel.textContent = `${option}: ${voteCount} votes (${percentage}%)`;
+  
+      // Progress bar
+      const progressBar = document.createElement("div");
+      progressBar.classList.add("progress-bar");
+  
+      const fillBar = document.createElement("div");
+      fillBar.classList.add("fill");
+      fillBar.style.width = `${percentage}%`; // Set width based on percentage
+  
+      progressBar.appendChild(fillBar);
+      resultItem.appendChild(optionLabel);
+      resultItem.appendChild(progressBar);
+  
+      resultsContainer.appendChild(resultItem);
+    });
+  
+    // Show the results container
+    resultsContainer.style.display = "block";
+  }
+  
+  </script>
+</head>
+<body>
+  <div id="poll-container">
+    <h2 id="poll-question">Your Poll Question Here</h2>
+    <form id="poll-form">
+      <!-- Options will be populated here dynamically -->
+    </form>
+    <button onclick="submitVote()">Vote</button>
+    <button onclick="displayResults()" id="show-results-btn" style="display: none;">Show Results</button>
+    <div id="results-container" style="display: none;">
+      <!-- Results will be displayed here -->
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
